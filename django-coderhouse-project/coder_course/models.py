@@ -26,10 +26,11 @@ class Rubros(models.Model):
 class Familias(models.Model):
     codigo = models.CharField(max_length=40)
     nombre = models.CharField(max_length=40)
+    
 
     def __str__(self):
         return f'Codigo:{self.codigo} - Nombre:{self.nombre}'
 
 class Avatar(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    IMAGEN = models.ImageField(upload_to='avatares', null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_profile')
+    avatares = models.ImageField(upload_to='avatares', null=True, blank=True)

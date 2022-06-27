@@ -4,7 +4,14 @@
 
         {% block contenidoQueCambia %}
 
-        {{mensaje}}
+        {% if user.is_authenticated %}
+        <div class="text-center">
+            {{mensaje}}
+            <img height="160px" src="{{url}}" alt="">
+        </div>
+        {% endif %}
+
+        
 
             <h1>Inicio</h1>
 

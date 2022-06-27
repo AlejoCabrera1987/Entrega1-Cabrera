@@ -5,8 +5,8 @@ from re import template
 from django.http import HttpResponse
 from django.template import Template, Context
 from django.template import loader
-from coder_course.forms import cargarFamilia, cargarRubro, cargarTarea, UserRegisterForm, UserEditForm
-from coder_course.models import Familias, Insumos, Rubros, Tareas
+from coder_course.forms import cargarFamilia, cargarRubro, cargarTarea, UserRegisterForm, UserEditForm, AvatarFormulario
+from coder_course.models import Familias, Insumos, Rubros, Tareas, Avatar
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -14,6 +14,9 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+import random
+import string
 
 # Create your views here.
 
@@ -21,7 +24,7 @@ from django.contrib.auth.models import User
 def index2(request):
     return render(request, "coder_course/index.html")
 
-
+@login_required
 def insumos(request):
     return render(request, "coder_course/insumos.html")
 
@@ -63,7 +66,15 @@ def rubros(request):
     return render(request, "coder_course/familias.html" )
 
 def iniciar(request):
-    return render (request, "coder_course/iniciar.html")
+    avatars = Avatar.objects.filter(user=request.user.id)
+    if avatars.exists():
+        context_dict = {"url":avatars[0].avatares.url}
+    else:
+        context_dict={}
+    return render (
+        request=request,
+        context=context_dict,
+        template_name="coder_course/iniciar.html")
 
 def familias(request):
     if request.method == "POST":
@@ -71,6 +82,12 @@ def familias(request):
         print(miFormulario)
         if miFormulario.is_valid():
             informacion = miFormulario.cleaned_data
+
+            KEY_LEN = 20
+            name_list = [random.choice((string.ascii_letters + string.digits)) for _ in range (KEY_LEN)]
+            mock_name = ''.join(name_list)
+
+            print(f'----> Prueba con: {mock_name}')
 
             familia = Familias(codigo=informacion["codigo"],nombre=informacion["nombre"])
             familia.save()
@@ -196,4 +213,15 @@ def editarPerfil(request):
 
     return render(request, "coder_course/editarPerfil.html",{"miFormulario":miFormulario,"usuario":{usuario}})
 
-    
+def agregarAvatar(request):
+    if request.method == "POST":
+        miFormulario = AvatarFormulario(request.POST, request.FILES)
+        if miFormulario.is_valid():
+            u = User.objects.get(username=request.user)
+            avatar = Avatar(user=u, avatares=miFormulario.cleaned_data['imagen'])
+            avatar.save()
+            return render(request,"coder_course/iniciar.html")
+    else:
+        miFormulario=AvatarFormulario()
+    return render(request, "coder_course/agregarAvatar.html",{"miFormulario":miFormulario})
+            

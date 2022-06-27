@@ -1,0 +1,18 @@
+{% extends "coder_course/padre.html" %}
+
+        {% load static %}
+
+        {% block contenidoQueCambia %}
+
+        <h2>Cargar Avatar</h2>
+        <form method="POST" enctype="multipart/form-data">
+
+            {% csrf_token %}
+            {{ miFormulario.as_p }}
+            
+        
+            <input type="submit" value ="Actualizar">
+        </form>
+
+
+        {% endblock %}
